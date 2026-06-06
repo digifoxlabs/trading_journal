@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" x-data="{ sidebar: false, logoutModal: false, dark: localStorage.getItem('theme') === 'dark' }" x-init="$watch('dark', value => localStorage.setItem('theme', value ? 'dark' : 'light'))" :class="{ 'dark': dark }">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" x-data="{ sidebar: false, profileMenu: false, logoutModal: false, dark: localStorage.getItem('theme') === 'dark' }" x-init="$watch('dark', value => localStorage.setItem('theme', value ? 'dark' : 'light'))" :class="{ 'dark': dark }">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -31,7 +31,6 @@
                     ['Analytics', 'analytics', 'M4 19V9m6 10V5m6 14v-7m4 7H3'],
                     ['Symbols', 'symbols.index', 'M7 7h10v10H7zM4 4h16v16H4z'],
                     ['Setups', 'setups.index', 'M12 6v12m6-6H6'],
-                    ['Profile', 'profile.edit', 'M12 12a4 4 0 100-8 4 4 0 000 8zm7 8a7 7 0 10-14 0'],
                 ];
             @endphp
             @foreach($links as [$label, $route, $icon])
@@ -40,12 +39,6 @@
                     <span>{{ $label }}</span>
                 </a>
             @endforeach
-            <div class="pt-2">
-                <button type="button" @click="logoutModal = true" class="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-white">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12H3m12-7l5 7-5 7"/></svg>
-                    Logout
-                </button>
-            </div>
         </nav>
     </aside>
     <div x-show="sidebar" x-cloak class="fixed inset-0 z-30 bg-black/40 lg:hidden" @click="sidebar = false"></div>
@@ -60,10 +53,45 @@
                     <p class="text-xs text-slate-500 dark:text-slate-400">Performance workspace</p>
                 </div>
             </div>
-            <button type="button" @click="dark = !dark" class="icon-button" aria-label="Toggle theme">
-                <svg x-show="!dark" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.8A8.5 8.5 0 1111.2 3a6.5 6.5 0 009.8 9.8z"/></svg>
-                <svg x-show="dark" x-cloak class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.4-6.4L17 7M7 17l-1.4 1.4M18.4 18.4L17 17M7 7 5.6 5.6M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-            </button>
+            <div class="flex items-center gap-2">
+                <button type="button" @click="dark = !dark" class="icon-button" aria-label="Toggle theme">
+                    <svg x-show="!dark" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.8A8.5 8.5 0 1111.2 3a6.5 6.5 0 009.8 9.8z"/></svg>
+                    <svg x-show="dark" x-cloak class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.4-6.4L17 7M7 17l-1.4 1.4M18.4 18.4L17 17M7 7 5.6 5.6M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                </button>
+
+                @php
+                    $user = auth()->user();
+                    $displayName = $user?->name ?: $user?->email;
+                    $initial = strtoupper(substr($displayName ?: 'U', 0, 1));
+                @endphp
+                <div class="relative" @click.outside="profileMenu = false">
+                    <button type="button" @click="profileMenu = !profileMenu" class="flex items-center gap-2 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-left shadow-sm shadow-slate-900/5 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700 dark:hover:bg-slate-800" aria-label="Open profile menu">
+                        <span class="grid h-8 w-8 place-items-center rounded-md bg-blue-600 text-xs font-bold text-white shadow-sm shadow-blue-600/20">{{ $initial }}</span>
+                        <span class="hidden min-w-0 sm:block">
+                            <span class="block max-w-36 truncate text-sm font-semibold text-slate-950 dark:text-white">{{ $displayName }}</span>
+                            <span class="block text-xs text-slate-500 dark:text-slate-400">Account</span>
+                        </span>
+                        <svg class="h-4 w-4 text-slate-500 transition dark:text-slate-400" :class="{ 'rotate-180': profileMenu }" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+                    </button>
+
+                    <div x-show="profileMenu" x-cloak class="absolute right-0 mt-2 w-56 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-xl shadow-slate-900/10 dark:border-slate-800 dark:bg-slate-900" @keydown.escape.window="profileMenu = false">
+                        <div class="border-b border-slate-100 px-4 py-3 dark:border-slate-800">
+                            <p class="truncate text-sm font-semibold text-slate-950 dark:text-white">{{ $displayName }}</p>
+                            <p class="truncate text-xs text-slate-500 dark:text-slate-400">{{ $user?->email }}</p>
+                        </div>
+                        <div class="p-1.5">
+                            <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 12a4 4 0 100-8 4 4 0 000 8zm7 8a7 7 0 10-14 0"/></svg>
+                                Profile
+                            </a>
+                            <button type="button" @click="profileMenu = false; logoutModal = true" class="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm font-medium text-red-600 transition hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-950/50">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12H3m12-7l5 7-5 7"/></svg>
+                                Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </header>
         <section class="p-4 sm:p-6 lg:flex-1 lg:overflow-y-auto">
             @if(session('status'))
