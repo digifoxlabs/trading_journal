@@ -1,0 +1,22 @@
+{
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "serve": "php artisan serve",
+        "hot": "concurrently \"php artisan serve\" \"npm run dev\""
+    },
+    "devDependencies": {
+        "alpinejs": "^3.14.9",
+        "autoprefixer": "^10.4.20",
+        "axios": "^1.6.4",
+        "chart.js": "^4.4.7",
+        "concurrently": "^9.2.1",
+        "flatpickr": "^4.6.13",
+        "laravel-vite-plugin": "^1.0.0",
+        "postcss": "^8.4.49",
+        "tailwindcss": "^3.4.17",
+        "vite": "^5.0.0"
+    }
+}
