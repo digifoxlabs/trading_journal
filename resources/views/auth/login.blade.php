@@ -49,7 +49,7 @@
                     @csrf
                     <label class="block">
                         <span class="control-label">Email</span>
-                        <input name="email" type="email" value="{{ old('email', 'admin@gmail.com') }}" required autofocus class="control-field">
+                        <input name="email" type="email" value="{{ old('email') }}" required autofocus class="control-field">
                     </label>
                     <label class="block">
                         <span class="control-label">Password</span>
